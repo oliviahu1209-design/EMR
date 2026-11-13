@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>緊急醫療資訊 | Emergency Medical Record</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- LZ-String 壓縮庫 (確保產出的 URL 與 QR Code 極致精簡) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+  <!-- QRCode.js 生成庫 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Google Fonts: Inter & Noto Sans (CJK 支援) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;family=Noto+Sans+JP:wght@400;700&amp;family=Noto+Sans+KR:wght@400;700&amp;family=Noto+Sans+SC:wght@400;700&amp;family=Noto+Sans+TC:wght@400;700&amp;display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans TC', 'Noto Sans SC', 'Noto Sans JP', 'Noto Sans KR', sans-serif;
+      background-color: #F4F7FA;
+      color: #101828;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* 醫療級配色變數與輔助樣式 */
+    .bg-med-blue { background-color: #0F4C81; }
+    .text-med-blue { color: #0F4C81; }
+    .border-med-blue { border-color: #0F4C81; }
+    
+    .bg-alert-red { background-color: #D92D20; }
+    .text-alert-red { color: #D92D20; }
+    .border-alert-red { border-color: #D92D20; }
+
+    /* QR Code 置中容器 */
+    #qrcode img, #qrcode canvas {
+      margin: 0 auto;
+      border-radius: 0.5rem;
+    }
+
+    /* 列印友善樣式 (@media print) */
+    @media print {
+      body { background-color: #FFFFFF !important; }
+      .no-print { display: none !important; }
+      .print-only { display: block !important; }
+      .shadow-md, .shadow-lg, .shadow-sm { box-shadow: none !important; }
+      .card-print {
+        border: 1.5px solid #CBD5E1 !important;
+        break-inside: avoid;
+        margin-bottom: 12px !important;
+      }
+      header {
+        background-color: #0F4C81 !important;
+        color: #FFFFFF !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .alert-banner-print {
+        background-color: #FEF2F2 !important;
+        border: 2px solid #D92D20 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0px}.left-1\/2{left:50%}.top-0{top:0px}.top-4{top:1rem}.z-40{z-index:40}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.mb-1{margin-bottom:0.25rem}.mb-1\.5{margin-bottom:0.375rem}.mb-3{margin-bottom:0.75rem}.mt-0\.5{margin-top:0.125rem}.mt-1{margin-top:0.25rem}.mt-3{margin-top:0.75rem}.mt-auto{margin-top:auto}.block{display:block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.h-7{height:1.75rem}.h-8{height:2rem}.min-h-\[180px\]{min-height:180px}.min-h-screen{min-height:100vh}.w-7{width:1.75rem}.w-8{width:2rem}.w-full{width:100%}.min-w-\[160px\]{min-width:160px}.min-w-\[68px\]{min-width:68px}.min-w-\[72px\]{min-width:72px}.min-w-\[74px\]{min-width:74px}.max-w-3xl{max-width:48rem}.max-w-md{max-width:28rem}.flex-1{flex:1 1 0%}.flex-shrink-0{flex-shrink:0}.flex-grow{flex-grow:1}.-translate-x-1\/2{--tw-translate-x:-50%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.transform{transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-2\.5{gap:0.625rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.space-y-1\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.375rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.375rem * var(--tw-space-y-reverse))}.space-y-2\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.625rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.625rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem * var(--tw-space-y-reverse))}.self-start{align-self:flex-start}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.whitespace-nowrap{white-space:nowrap}.whitespace-pre-line{white-space:pre-line}.break-words{overflow-wrap:break-word}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.rounded-r-xl{border-top-right-radius:0.75rem;border-bottom-right-radius:0.75rem}.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-l-4{border-left-width:4px}.border-t{border-top-width:1px}.border-dashed{border-style:dashed}.border-amber-500\/70{border-color:rgb(245 158 11 / 0.7)}.border-blue-800\/80{border-color:rgb(30 64 175 / 0.8)}.border-emerald-200{--tw-border-opacity:1;border-color:rgb(167 243 208 / var(--tw-border-opacity, 1))}.border-red-100{--tw-border-opacity:1;border-color:rgb(254 226 226 / var(--tw-border-opacity, 1))}.border-red-200{--tw-border-opacity:1;border-color:rgb(254 202 202 / var(--tw-border-opacity, 1))}.border-slate-100{--tw-border-opacity:1;border-color:rgb(241 245 249 / var(--tw-border-opacity, 1))}.border-slate-200{--tw-border-opacity:1;border-color:rgb(226 232 240 / var(--tw-border-opacity, 1))}.border-slate-200\/80{border-color:rgb(226 232 240 / 0.8)}.border-slate-300{--tw-border-opacity:1;border-color:rgb(203 213 225 / var(--tw-border-opacity, 1))}.border-slate-700{--tw-border-opacity:1;border-color:rgb(51 65 85 / var(--tw-border-opacity, 1))}.border-blue-200{--tw-border-opacity:1;border-color:rgb(191 219 254 / var(--tw-border-opacity, 1))}.border-red-700{--tw-border-opacity:1;border-color:rgb(185 28 28 / var(--tw-border-opacity, 1))}.bg-amber-100{--tw-bg-opacity:1;background-color:rgb(254 243 199 / var(--tw-bg-opacity, 1))}.bg-amber-600{--tw-bg-opacity:1;background-color:rgb(217 119 6 / var(--tw-bg-opacity, 1))}.bg-amber-800\/60{background-color:rgb(146 64 14 / 0.6)}.bg-blue-50{--tw-bg-opacity:1;background-color:rgb(239 246 255 / var(--tw-bg-opacity, 1))}.bg-blue-900\/60{background-color:rgb(30 58 138 / 0.6)}.bg-emerald-100{--tw-bg-opacity:1;background-color:rgb(209 250 229 / var(--tw-bg-opacity, 1))}.bg-emerald-50{--tw-bg-opacity:1;background-color:rgb(236 253 245 / var(--tw-bg-opacity, 1))}.bg-emerald-600{--tw-bg-opacity:1;background-color:rgb(5 150 105 / var(--tw-bg-opacity, 1))}.bg-emerald-700{--tw-bg-opacity:1;background-color:rgb(4 120 87 / var(--tw-bg-opacity, 1))}.bg-emerald-900\/60{background-color:rgb(6 78 59 / 0.6)}.bg-red-50{--tw-bg-opacity:1;background-color:rgb(254 242 242 / var(--tw-bg-opacity, 1))}.bg-red-50\/70{background-color:rgb(254 242 242 / 0.7)}.bg-slate-100{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.bg-slate-50{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.bg-slate-700{--tw-bg-opacity:1;background-color:rgb(51 65 85 / var(--tw-bg-opacity, 1))}.bg-slate-800{--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.bg-slate-900{--tw-bg-opacity:1;background-color:rgb(15 23 42 / var(--tw-bg-opacity, 1))}.bg-slate-900\/70{background-color:rgb(15 23 42 / 0.7)}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254 / var(--tw-bg-opacity, 1))}.bg-blue-900\/50{background-color:rgb(30 58 138 / 0.5)}.p-2{padding:0.5rem}.p-3{padding:0.75rem}.p-3\.5{padding:0.875rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-3\.5{padding-left:0.875rem;padding-right:0.875rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-5{padding-top:1.25rem;padding-bottom:1.25rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.pb-0\.5{padding-bottom:0.125rem}.pb-2\.5{padding-bottom:0.625rem}.pb-3{padding-bottom:0.75rem}.pb-4{padding-bottom:1rem}.pb-6{padding-bottom:1.5rem}.pt-1{padding-top:0.25rem}.pt-2{padding-top:0.5rem}.pt-2\.5{padding-top:0.625rem}.pt-4{padding-top:1rem}.text-center{text-align:center}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-\[11px\]{font-size:11px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-black{font-weight:900}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-none{line-height:1}.leading-relaxed{line-height:1.625}.leading-snug{line-height:1.375}.leading-tight{line-height:1.25}.tracking-tight{letter-spacing:-0.025em}.tracking-wide{letter-spacing:0.025em}.tracking-wider{letter-spacing:0.05em}.text-amber-700{--tw-text-opacity:1;color:rgb(180 83 9 / var(--tw-text-opacity, 1))}.text-amber-900{--tw-text-opacity:1;color:rgb(120 53 15 / var(--tw-text-opacity, 1))}.text-blue-100{--tw-text-opacity:1;color:rgb(219 234 254 / var(--tw-text-opacity, 1))}.text-blue-200{--tw-text-opacity:1;color:rgb(191 219 254 / var(--tw-text-opacity, 1))}.text-emerald-700{--tw-text-opacity:1;color:rgb(4 120 87 / var(--tw-text-opacity, 1))}.text-emerald-800{--tw-text-opacity:1;color:rgb(6 95 70 / var(--tw-text-opacity, 1))}.text-emerald-900{--tw-text-opacity:1;color:rgb(6 78 59 / var(--tw-text-opacity, 1))}.text-red-600{--tw-text-opacity:1;color:rgb(220 38 38 / var(--tw-text-opacity, 1))}.text-red-950{--tw-text-opacity:1;color:rgb(69 10 10 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105 / var(--tw-text-opacity, 1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59 / var(--tw-text-opacity, 1))}.text-slate-900{--tw-text-opacity:1;color:rgb(15 23 42 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.underline{-webkit-text-decoration-line:underline;text-decoration-line:underline}.shadow{--tw-shadow:0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.ring-2{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.ring-amber-400{--tw-ring-opacity:1;--tw-ring-color:rgb(251 191 36 / var(--tw-ring-opacity, 1))}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-300{transition-duration:300ms}.hover\:bg-amber-200:hover{--tw-bg-opacity:1;background-color:rgb(253 230 138 / var(--tw-bg-opacity, 1))}.hover\:bg-blue-800:hover{--tw-bg-opacity:1;background-color:rgb(30 64 175 / var(--tw-bg-opacity, 1))}.hover\:bg-blue-900:hover{--tw-bg-opacity:1;background-color:rgb(30 58 138 / var(--tw-bg-opacity, 1))}.hover\:bg-emerald-700:hover{--tw-bg-opacity:1;background-color:rgb(4 120 87 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-200:hover{--tw-bg-opacity:1;background-color:rgb(226 232 240 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-50:hover{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-900:hover{--tw-bg-opacity:1;background-color:rgb(15 23 42 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-100:hover{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.hover\:text-red-600:hover{--tw-text-opacity:1;color:rgb(220 38 38 / var(--tw-text-opacity, 1))}.hover\:underline:hover{-webkit-text-decoration-line:underline;text-decoration-line:underline}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:ring-2:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-amber-500:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(245 158 11 / var(--tw-ring-opacity, 1))}.focus\:ring-blue-600:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(37 99 235 / var(--tw-ring-opacity, 1))}.focus\:ring-emerald-600:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(5 150 105 / var(--tw-ring-opacity, 1))}.focus\:ring-red-500:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(239 68 68 / var(--tw-ring-opacity, 1))}.active\:scale-\[0\.99\]:active{--tw-scale-x:0.99;--tw-scale-y:0.99;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@media (min-width: 640px){.sm\:col-span-2{grid-column:span 2 / span 2}.sm\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.sm\:flex-row{flex-direction:row}.sm\:items-center{align-items:center}.sm\:self-center{align-self:center}.sm\:p-5{padding:1.25rem}.sm\:p-6{padding:1.5rem}.sm\:text-3xl{font-size:1.875rem;line-height:2.25rem}.sm\:text-base{font-size:1rem;line-height:1.5rem}.sm\:text-lg{font-size:1.125rem;line-height:1.75rem}.sm\:text-sm{font-size:0.875rem;line-height:1.25rem}.sm\:text-xl{font-size:1.25rem;line-height:1.75rem}}@media (min-width: 768px){.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}}</style></head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- 頂部訊息提示框 (取代 alert) -->
+  <div id="toast" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 no-print hidden">
+    <div id="toast-content" class="bg-slate-900 text-white px-5 py-3 rounded-xl shadow-xl font-semibold text-sm flex items-center gap-2 border border-slate-700">
+      <span id="toast-icon">💾</span>
+      <span id="toast-msg">單一完整 HTML 檔案已下載！</span>
+    </div>
+  </div>
+
+  <!-- 頂部急救醫療識別橫幅 -->
+  <header class="bg-med-blue text-white shadow-md sticky top-0 z-40">
+    <div class="max-w-3xl mx-auto px-4 py-3">
+      <div class="flex items-center justify-between gap-2">
+        <!-- Star of Life / 醫療十字標誌 + 標題 -->
+        <div class="flex items-center gap-3">
+          <div class="bg-white text-alert-red p-2 rounded-xl shadow-sm flex-shrink-0" aria-hidden="true">
+            <!-- 醫療十字 SVG -->
+            <svg class="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 3H5C3.89 3 3 3.9 3 5V19C3 20.1 3.89 21 5 21H19C20.11 21 21 20.1 21 19V5C21 3.9 20.11 3 19 3ZM18 14H14V18H10V14H6V10H10V6H14V10H18V14Z"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="text-[11px] font-bold tracking-wider uppercase text-blue-200 leading-tight">
+              EMERGENCY MEDICAL RECORD
+            </div>
+            <h1 id="ui-header-title" class="text-lg sm:text-xl font-extrabold tracking-tight leading-snug">緊急醫療資訊卡</h1>
+          </div>
+        </div>
+
+        <!-- 模式切換按鈕 (檢視 / 編輯) -->
+        <div class="no-print flex items-center gap-1.5">
+          <button id="btn-mode-view" onclick="switchMode('view')" class="px-3 py-2 rounded-lg text-xs sm:text-sm font-bold transition cursor-pointer bg-blue-900/60 text-blue-100 hover:bg-blue-800">
+            <span id="ui-btn-view">急救檢視</span>
+          </button>
+          <button id="btn-mode-edit" onclick="switchMode('edit')" class="px-3 py-2 rounded-lg text-xs sm:text-sm font-bold transition cursor-pointer bg-white text-med-blue shadow">
+            <span id="ui-btn-edit">編輯建檔</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 五國語言即時切換列 -->
+      <div class="mt-3 pt-2.5 border-t border-blue-800/80 flex items-center gap-1.5 overflow-x-auto no-print pb-0.5" role="group" aria-label="Language Switcher">
+        <button onclick="setLanguage('zh-TW')" data-lang="zh-TW" class="lang-btn flex-1 min-w-[68px] py-1.5 px-2 rounded-lg text-xs font-extrabold text-center transition cursor-pointer bg-white text-med-blue shadow-sm ring-2 ring-amber-400">
+          🇹🇼 繁體
+        </button>
+        <button onclick="setLanguage('zh-CN')" data-lang="zh-CN" class="lang-btn flex-1 min-w-[68px] py-1.5 px-2 rounded-lg text-xs font-semibold text-center transition cursor-pointer bg-blue-900/50 text-blue-100 hover:bg-blue-800">
+          🇨🇳 简体
+        </button>
+        <button onclick="setLanguage('en')" data-lang="en" class="lang-btn flex-1 min-w-[68px] py-1.5 px-2 rounded-lg text-xs font-semibold text-center transition cursor-pointer bg-blue-900/50 text-blue-100 hover:bg-blue-800">
+          🇺🇸 English
+        </button>
+        <button onclick="setLanguage('ja')" data-lang="ja" class="lang-btn flex-1 min-w-[68px] py-1.5 px-2 rounded-lg text-xs font-semibold text-center transition cursor-pointer bg-blue-900/50 text-blue-100 hover:bg-blue-800">
+          🇯🇵 日本語
+        </button>
+        <button onclick="setLanguage('ko')" data-lang="ko" class="lang-btn flex-1 min-w-[68px] py-1.5 px-2 rounded-lg text-xs font-semibold text-center transition cursor-pointer bg-blue-900/50 text-blue-100 hover:bg-blue-800">
+          🇰🇷 한국어
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主內容區塊 -->
+  <main class="flex-grow max-w-3xl w-full mx-auto px-4 py-5 space-y-5">
+
+    <!-- ========================================== -->
+    <!-- 模式一：檢視 / 急救模式 (VIEW MODE)         -->
+    <!-- ========================================== -->
+    <section id="view-section" class="space-y-4 hidden">
+      
+      <!-- 醫療人員提示橫幅 -->
+      <div class="bg-blue-50 border-l-4 border-med-blue p-3.5 rounded-r-xl text-xs sm:text-sm text-slate-700 flex items-start gap-2.5 card-print">
+        <span class="text-lg leading-none">🩺</span>
+        <p id="ui-paramedic-notice" class="font-medium leading-relaxed">致醫療救護人員：此頁面為旅客緊急醫療紀錄，點擊上方語言按鈕可即時切換為當地語言。</p>
+      </div>
+
+      <!-- 1. 個人基本資料與高對比血型卡 -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-print">
+        <div class="bg-slate-800 text-white px-4 py-2.5 flex items-center justify-between">
+          <h2 id="ui-sec-basic" class="text-sm font-bold tracking-wide uppercase flex items-center gap-2">
+            <span>👤</span> <span>個人基本資料</span>
+          </h2>
+          <span class="text-xs text-slate-300 font-mono">PATIENT ID</span>
+        </div>
+
+        <div class="p-4 sm:p-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+            <!-- 姓名 -->
+            <div>
+              <div id="ui-lbl-name" class="text-xs font-bold text-slate-500 uppercase tracking-wider">姓名 (護照拼音 / 本名)</div>
+              <div id="view-name" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-0.5 break-words">WANG, XIAO-MING (王小明)</div>
+            </div>
+
+            <!-- 血型醒目徽章 -->
+            <div class="flex items-center gap-3 bg-red-50 border-2 border-alert-red rounded-2xl px-4 py-2.5 self-start sm:self-center">
+              <div>
+                <div id="ui-lbl-blood" class="text-[11px] font-extrabold text-alert-red uppercase">血型</div>
+                <div id="view-blood" class="text-2xl sm:text-3xl font-black text-alert-red leading-none mt-0.5">O+</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 性別、出生年月日、自動換算年齡 -->
+          <div class="grid grid-cols-3 gap-3 pt-4">
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+              <div id="ui-lbl-gender" class="text-xs font-semibold text-slate-500">性別</div>
+              <div id="view-gender" class="text-base sm:text-lg font-bold text-slate-900 mt-0.5">男性 (Male)</div>
+            </div>
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+              <div id="ui-lbl-age" class="text-xs font-semibold text-slate-500">年齡</div>
+              <div id="view-age" class="text-base sm:text-lg font-bold text-slate-900 mt-0.5">34 歲</div>
+            </div>
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+              <div id="ui-lbl-dob" class="text-xs font-semibold text-slate-500">出生日期</div>
+              <div id="view-dob" class="text-sm sm:text-base font-bold text-slate-900 mt-0.5 font-mono">1992-05-15</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. 過敏史 (高警示紅色卡片 - 置頂優先顯示) -->
+      <div class="bg-red-50/70 rounded-2xl shadow-sm border-2 border-alert-red overflow-hidden alert-banner-print card-print">
+        <div class="bg-alert-red text-white px-4 py-2.5 flex items-center justify-between">
+          <h2 id="ui-sec-allergy" class="text-sm font-extrabold tracking-wide uppercase flex items-center gap-2">
+            <span>⚠️</span> <span>過敏史 (藥物 / 食物過敏)</span>
+          </h2>
+          <span class="text-xs font-extrabold bg-white text-alert-red px-2 py-0.5 rounded">CRITICAL</span>
+        </div>
+        <div class="p-4 sm:p-5 space-y-2.5">
+          <!-- 五語自動翻譯標籤列表 -->
+          <div id="view-allergy-tags" class="flex flex-wrap gap-2"><span class="px-3 py-1 rounded-lg text-sm font-extrabold border bg-alert-red text-white border-red-700 shadow-xs">盤尼西林 (Penicillin)</span><span class="px-3 py-1 rounded-lg text-sm font-extrabold border bg-alert-red text-white border-red-700 shadow-xs">海鮮 / 甲殼類 (Seafood)</span></div>
+          <!-- 補充文字 -->
+          <p id="view-allergy-note" class="text-base sm:text-lg font-bold text-red-950 leading-relaxed whitespace-pre-line">Penicillin causes severe skin rash and dyspnea.
+盤尼西林會引起嚴重皮膚紅疹與呼吸困難。</p>
+        </div>
+      </div>
+
+      <!-- 3. 目前用藥紀錄 -->
+      <div class="bg-white rounded-2xl shadow-sm border-2 border-amber-500/70 overflow-hidden card-print">
+        <div class="bg-amber-600 text-white px-4 py-2.5 flex items-center justify-between">
+          <h2 id="ui-sec-meds" class="text-sm font-bold tracking-wide uppercase flex items-center gap-2">
+            <span>💊</span> <span>目前用藥紀錄</span>
+          </h2>
+          <span class="text-xs font-bold bg-amber-800/60 px-2 py-0.5 rounded">MEDICATIONS</span>
+        </div>
+        <div class="p-4 sm:p-5">
+          <p id="view-meds" class="text-base sm:text-lg font-semibold text-slate-900 leading-relaxed whitespace-pre-line">1. Cetirizine 10mg (PRN for allergy / 過敏時服用)
+2. Vitamin B Complex (Daily)</p>
+        </div>
+      </div>
+
+      <!-- 4. 內科病史 & 外科病史 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- 內科病史 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-print">
+          <div class="bg-med-blue text-white px-4 py-2.5">
+            <h2 id="ui-sec-medical" class="text-sm font-bold tracking-wide uppercase flex items-center gap-2">
+              <span>🫀</span> <span>內科病史 / 慢性病</span>
+            </h2>
+          </div>
+          <div class="p-4 space-y-2.5">
+            <div id="view-medical-tags" class="flex flex-wrap gap-1.5">
+          <span class="px-2.5 py-1 rounded-lg text-xs sm:text-sm font-bold bg-blue-100 text-med-blue border border-blue-200">
+            氣喘 (Asthma)
+          </span>
+        </div>
+            <p id="view-medical-note" class="text-sm sm:text-base font-medium text-slate-800 leading-relaxed whitespace-pre-line">Mild exercise-induced asthma; carries Salbutamol inhaler.
+輕微運動型氣喘，隨身攜帶支氣管擴張吸入劑。</p>
+          </div>
+        </div>
+
+        <!-- 外科病史 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-print">
+          <div class="bg-slate-700 text-white px-4 py-2.5">
+            <h2 id="ui-sec-surgical" class="text-sm font-bold tracking-wide uppercase flex items-center gap-2">
+              <span>🏥</span> <span>外科病史 / 手術紀錄</span>
+            </h2>
+          </div>
+          <div class="p-4">
+            <p id="view-surgical" class="text-sm sm:text-base font-medium text-slate-800 leading-relaxed whitespace-pre-line">2018 - Appendectomy (闌尾切除手術)</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. 緊急聯絡人 -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-print">
+        <div class="bg-emerald-700 text-white px-4 py-2.5 flex items-center justify-between">
+          <h2 id="ui-sec-ice" class="text-sm font-bold tracking-wide uppercase flex items-center gap-2">
+            <span>📞</span> <span>緊急聯絡人 (ICE)</span>
+          </h2>
+          <span class="text-xs font-bold bg-emerald-900/60 px-2 py-0.5 rounded">IN CASE OF EMERGENCY</span>
+        </div>
+        <div class="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <div id="ui-lbl-ice-name" class="text-xs font-bold text-slate-500">聯絡人姓名與關係</div>
+            <div class="mt-1 flex items-center gap-2 flex-wrap">
+              <span id="view-ice-name" class="text-lg font-extrabold text-slate-900">LIN, MEI-LING (林美玲)</span>
+              <span id="view-ice-rel" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">配偶</span>
+            </div>
+          </div>
+          <div>
+            <div id="ui-lbl-ice-phone" class="text-xs font-bold text-slate-500">國際電話 &amp; 備用聯絡方式</div>
+            <div class="mt-1 space-y-1.5">
+              <a id="view-ice-phone-link" href="tel:+886912345678" class="inline-flex items-center gap-1.5 text-lg font-extrabold text-med-blue hover:underline">
+                <span>📱</span>
+                <span id="view-ice-phone">+886-912-345-678</span>
+              </a>
+              <div id="view-ice-alt" class="text-sm font-medium text-slate-600">LINE / WhatsApp: +886912345678</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 檢視模式底部操作按鈕 (分享 QR Code / 列印 / 編輯) -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-3 no-print">
+        <button onclick="openShareModal()" class="flex-1 min-w-[160px] bg-med-blue hover:bg-blue-900 text-white font-bold py-3 px-4 rounded-xl shadow transition flex items-center justify-center gap-2 cursor-pointer">
+          <span>🔗</span>
+          <span id="ui-btn-show-qr">顯示專屬網址與 QR Code</span>
+        </button>
+        <button onclick="window.print()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-3 px-4 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer">
+          <span>🖨️</span>
+          <span id="ui-btn-print">列印 / 存為 PDF</span>
+        </button>
+        <button onclick="switchMode('edit')" class="bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold py-3 px-4 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer">
+          <span>✏️</span>
+          <span id="ui-btn-edit-bottom">修改我的資料</span>
+        </button>
+      </div>
+    </section>
+
+
+    <!-- ========================================== -->
+    <!-- 模式二：編輯 / 建檔模式 (EDIT MODE)         -->
+    <!-- ========================================== -->
+    <section id="edit-section" class="space-y-5 no-print">
+      
+      <!-- 隱私與運作說明橫幅 -->
+      <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-sm text-emerald-900 flex items-start gap-3">
+        <span class="text-xl">🔒</span>
+        <div>
+          <p class="font-bold">100% 純前端離線隱私保護</p>
+          <p class="text-xs sm:text-sm text-emerald-800 mt-0.5 leading-relaxed">
+            您的病歷資料<strong>不會上傳至任何伺服器</strong>。點擊下方「產生專屬病歷網址 &amp; QR Code」後，所有資訊會直接壓縮並編碼進專屬網址中，隨時離線開啟皆可五語即時翻譯。
+          </p>
+        </div>
+      </div>
+
+      <form id="medical-form" onsubmit="event.preventDefault(); generateAndShowShare();" class="space-y-5">
+        
+        <!-- 表單區塊 1：個人基本資料 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h2 class="text-base font-extrabold text-med-blue flex items-center gap-2">
+              <span>👤</span> <span>1. 個人基本資料</span>
+            </h2>
+            <button type="button" onclick="clearForm()" class="text-xs font-semibold text-slate-400 hover:text-red-600 underline cursor-pointer">
+              清空重填
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-slate-700 mb-1">
+                姓名（強烈建議填寫護照英文拼音 + 本國姓名）<span class="text-red-600">*</span>
+              </label>
+              <input type="text" id="input-name" required="" placeholder="例如：CHEN, DA-MING (陳大明)" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-600">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">血型 (Blood Type)</label>
+              <select id="input-blood" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-bold bg-white focus:outline-none focus:ring-2 focus:ring-blue-600">
+                <option value="O+">O+ (O型 Rh陽性)</option>
+                <option value="O-">O- (O型 Rh陰性)</option>
+                <option value="A+">A+ (A型 Rh陽性)</option>
+                <option value="A-">A- (A型 Rh陰性)</option>
+                <option value="B+">B+ (B型 Rh陽性)</option>
+                <option value="B-">B- (B型 Rh陰性)</option>
+                <option value="AB+">AB+ (AB型 Rh陽性)</option>
+                <option value="AB-">AB- (AB型 Rh陰性)</option>
+                <option value="Unknown">Unknown (未知 / 不確定)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">性別 (五語自動翻譯)</label>
+              <select id="input-gender" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-blue-600">
+                <option value="male">男性 (Male)</option>
+                <option value="female">女性 (Female)</option>
+                <option value="other">其他 (Other)</option>
+              </select>
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-slate-700 mb-1">出生年月日 (系統將自動換算當前年齡)</label>
+              <input type="date" id="input-dob" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-600">
+            </div>
+          </div>
+        </div>
+
+        <!-- 表單區塊 2：過敏史 (含五國語言自動翻譯快選標籤) -->
+        <div class="bg-white rounded-2xl shadow-sm border-2 border-red-200 p-4 sm:p-5 space-y-4">
+          <div class="border-b border-red-100 pb-3">
+            <h2 class="text-base font-extrabold text-alert-red flex items-center gap-2">
+              <span>⚠️</span> <span>2. 過敏史 (Allergies) — 藥物與食物過敏</span>
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">點選下方常見過敏原標籤，切換外語時將自動翻譯為當地醫療專有名詞：</p>
+          </div>
+
+          <!-- 過敏原快選標籤容器 -->
+          <div id="allergy-preset-container" class="flex flex-wrap gap-2">
+        <button type="button" data-type="allergy" data-id="nkda" onclick="togglePresetTag('allergy', 'nkda')" class="preset-btn px-3 py-1.5 rounded-full text-xs font-bold border border-alert-red bg-alert-red text-white shadow-xs transition cursor-pointer">
+          無已知過敏 (NKDA)
+        </button>
+      
+        <button type="button" data-type="allergy" data-id="penicillin" onclick="togglePresetTag('allergy', 'penicillin')" class="preset-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-300 bg-slate-50 text-slate-700 hover:bg-slate-100 transition cursor-pointer">
+          盤尼西林 (Penicillin)
+        </button>
+      
+        <button type="button" data-type="allergy" data-id="nsaids" onclick="togglePresetTag('allergy', 'nsaids')" class="preset-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-300 bg-slate-50 text-slate-700 hover:bg-slate-100 transition cursor-pointer">
+          非類固醇消炎藥 (NSAIDs)
+        </button>
+      
+        <button type="button" data-type="allergy" data-id="aspirin" onclick="togglePresetTag('allergy', 'aspirin')" class="preset-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-300 bg-slate-50 text-slate-700 hover:bg-slate-100 transition cursor-pointer">
+          阿斯匹靈 (Aspirin)
+        </button>
+      
+        <button type="button" data-type="allergy" data-id="contrast" onclick="togglePresetTag('allergy', 'contrast')" class="preset-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-300 bg-slate-50 text-slate-700 hover:bg-slate-100 transition cursor-pointer">
+          顯影劑 (Contrast Media)
+        </button>
+      
+        <button type="button" data-type="allergy" data-id="sulfa" onclick="togglePresetTag('allergy', 'sulfa')" class="preset-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-300 bg-slate-50 text-slate-700 hover:bg-slate-100 transition cursor-pointer">
+          磺胺類藥物 (Sulfonamides)
+        </button>
+      
+        <button type="button" data-type="allergy" data-id="seafood" onclick="togglePresetTag('allergy', 'seafood')" class="preset-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-300 bg-slate-50 text-slate-700 hover:bg-slate-100 transition cursor-pointer">
+          海鮮 / 甲殼類 (Seafood)
+        </button>
+      
+        <button type="button" data-type="allergy" data-id="peanuts" onclick="togglePresetTag('allergy', 'peanuts')" class="preset-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-300 bg-slate-50 text-slate-700 hover:bg-slate-100 transition cursor-pointer">
+          花生 / 堅果 (Peanuts)
+        </button>
+      </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">其他過敏原或過敏反應補充說明（建議附英文）</label>
+            <textarea id="input-allergy-note" rows="2" placeholder="例如：對 Ibuprofen 過敏會引發呼吸困難 (Dyspnea)；對奇異果輕微過敏" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"></textarea>
+          </div>
+        </div>
+
+        <!-- 表單區塊 3：目前用藥紀錄 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5 space-y-3">
+          <div class="border-b border-slate-100 pb-2.5">
+            <h2 class="text-base font-extrabold text-amber-700 flex items-center gap-2">
+              <span>💊</span> <span>3. 目前用藥紀錄 (Current Medications)</span>
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">建議填寫學名（英文成分名）、劑量與服用頻次，方便國外醫師核對交互作用。</p>
+          </div>
+          <textarea id="input-meds" rows="3" placeholder="例如：
+1. Amlodipine 5mg - 每日早上 1 顆 (降血壓)
+2. Metformin 500mg - 早晚餐後各 1 顆 (控血糖)
+若無請留白或填 None" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+        </div>
+
+        <!-- 表單區塊 4：內科病史 & 外科病史 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5 space-y-4">
+          <div class="border-b border-slate-100 pb-2.5">
+            <h2 class="text-base font-extrabold text-med-blue flex items-center gap-2">
+              <span>🏥</span> <span>4. 內科與外科病史 (Medical &amp; Surgical History)</span>
+            </h2>
+          </div>
+
+          <!-- 內科慢性病五語快選 -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">常見內科慢性病快選（切換語言自動翻譯）：</label>
+            <div id="medical-preset-container" class="flex flex-wrap gap-2 mb-3">
+        <button type="button" data-type="medical" data-id="none" onclick="togglePresetTag('medical', 'none')" class="preset-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-300 bg-slate-50 text-slate-700 hover:bg-slate-100 transition cursor-pointer">
+          無慢性病史 (None)
+        </button>
+      
+        <button type="button" data-type="medical" data-id="htn" onclick="togglePresetTag('medical', 'htn')" class="preset-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-300 bg-slate-50 text-slate-700 hover:bg-slate-100 transition cursor-pointer">
+          高血壓 (Hypertension)
+        </button>
+      
+        <button type="button" data-type="medical" data-id="dm" onclick="togglePresetTag('medical', 'dm')" class="preset-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-300 bg-slate-50 text-slate-700 hover:bg-slate-100 transition cursor-pointer">
+          糖尿病 (Diabetes)
+        </button>
+      
+        <button type="button" data-type="medical" data-id="asthma" onclick="togglePresetTag('medical', 'asthma')" class="preset-btn px-3 py-1.5 rounded-full text-xs font-bold border border-med-blue bg-med-blue text-white shadow-xs transition cursor-pointer">
+          氣喘 (Asthma)
+        </button>
+      
+        <button type="button" data-type="medical" data-id="heart" onclick="togglePresetTag('medical', 'heart')" class="preset-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-300 bg-slate-50 text-slate-700 hover:bg-slate-100 transition cursor-pointer">
+          心臟病 (Heart Disease)
+        </button>
+      
+        <button type="button" data-type="medical" data-id="epilepsy" onclick="togglePresetTag('medical', 'epilepsy')" class="preset-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-300 bg-slate-50 text-slate-700 hover:bg-slate-100 transition cursor-pointer">
+          癲癇 (Epilepsy)
+        </button>
+      
+        <button type="button" data-type="medical" data-id="stroke" onclick="togglePresetTag('medical', 'stroke')" class="preset-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-300 bg-slate-50 text-slate-700 hover:bg-slate-100 transition cursor-pointer">
+          中風病史 (Stroke)
+        </button>
+      </div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">內科病史補充細節</label>
+            <textarea id="input-medical-note" rows="2" placeholder="例如：第二型糖尿病 (Type 2 DM) 控制穩定；曾有氣喘發作史" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"></textarea>
+          </div>
+
+          <div class="pt-2 border-t border-slate-100">
+            <label class="block text-xs font-bold text-slate-700 mb-1">外科病史 / 重大手術與年份 (Surgical History)</label>
+            <textarea id="input-surgical" rows="2" placeholder="例如：2018 闌尾切除術 (Appendectomy)；2022 右膝關節鏡手術。若無請留白" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"></textarea>
+          </div>
+        </div>
+
+        <!-- 表單區塊 5：緊急聯絡人 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5 space-y-4">
+          <div class="border-b border-slate-100 pb-2.5">
+            <h2 class="text-base font-extrabold text-emerald-700 flex items-center gap-2">
+              <span>📞</span> <span>5. 緊急聯絡人 (Emergency Contact)</span>
+            </h2>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">聯絡人姓名</label>
+              <input type="text" id="input-ice-name" placeholder="例如：WANG, MEI-HUA (王美華)" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-600">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">與本人關係 (五語自動翻譯)</label>
+              <select id="input-ice-rel" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                <option value="spouse">配偶 (Spouse)</option>
+                <option value="parent">父母 (Parent)</option>
+                <option value="child">子女 (Child)</option>
+                <option value="sibling">兄弟姊妹 (Sibling)</option>
+                <option value="friend">朋友 / 同行旅伴 (Friend / Companion)</option>
+                <option value="other">其他 (Other)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">國際電話（請務必加上國碼，如台灣 +886）</label>
+              <input type="tel" id="input-ice-phone" placeholder="+886-912-345-678" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-600">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">備用聯絡方式 (LINE / WhatsApp / Email)</label>
+              <input type="text" id="input-ice-alt" placeholder="LINE ID / WhatsApp / Email" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600">
+            </div>
+          </div>
+        </div>
+
+        <!-- 產出專屬網址 & QR Code 主按鈕 -->
+        <div class="pt-2 pb-6 space-y-3">
+          <button type="submit" class="w-full bg-med-blue hover:bg-blue-900 text-white font-extrabold text-base py-4 px-6 rounded-2xl shadow-lg transition transform active:scale-[0.99] flex items-center justify-center gap-2.5 cursor-pointer">
+            <span class="text-xl">🚀</span>
+            <span>產生專屬病歷網址 &amp; QR Code</span>
+          </button>
+
+          <button type="button" onclick="downloadStandaloneHTML()" class="w-full bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-bold text-sm py-3 px-4 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer">
+            <span>💾</span>
+            <span>下載完整單一 HTML 檔案（可自行部署至 GitHub Pages 或離線保存）</span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+  </main>
+
+  <!-- 頁尾 -->
+  <footer class="max-w-3xl w-full mx-auto px-4 py-6 text-center text-xs text-slate-400 border-t border-slate-200/80 mt-auto">
+    <p>Multi-language Travel Emergency Medical Record • Zero-Server Client-Side Architecture</p>
+    <p class="mt-1">資料僅儲存於您的專屬網址參數中，請妥善保存您的緊急醫療 QR Code。</p>
+  </footer>
+
+
+  <!-- ========================================== -->
+  <!-- 彈出視窗：專屬 URL 與 QR Code 分享視窗      -->
+  <!-- ========================================== -->
+  <div id="share-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-slate-200 space-y-4 relative animate-fade-in">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+          <span>📲</span> <span>您的專屬緊急病歷 QR Code</span>
+        </h3>
+        <button onclick="closeShareModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold flex items-center justify-center cursor-pointer">
+          ✕
+        </button>
+      </div>
+
+      <!-- QR Code 繪製區 -->
+      <div class="bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl p-4 text-center">
+        <div id="qrcode" class="flex justify-center items-center min-h-[180px]"></div>
+        <p class="text-xs font-bold text-slate-600 mt-3">
+          💡 建議截圖設為「手機鎖定畫面桌布」，或列印貼於護照夾內頁
+        </p>
+      </div>
+
+      <!-- 網址複製區 -->
+      <div>
+        <label class="block text-xs font-bold text-slate-500 mb-1">專屬加密編碼病歷網址 (包含完整病歷資料)：</label>
+        <div class="flex items-center gap-2">
+          <input type="text" id="share-url-input" readonly="" class="flex-1 bg-slate-100 border border-slate-300 rounded-xl px-3 py-2.5 text-xs font-mono text-slate-700 focus:outline-none">
+          <button onclick="copyShareUrl()" class="bg-med-blue hover:bg-blue-900 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow transition whitespace-nowrap cursor-pointer">
+            複製連結
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2.5 pt-1">
+        <button onclick="downloadQRImage()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm py-2.5 px-3 rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer">
+          <span>🖼️</span> <span>下載 QR 圖片</span>
+        </button>
+        <button onclick="closeShareModal()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs sm:text-sm py-2.5 px-3 rounded-xl transition cursor-pointer">
+          完成並檢視病歷
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================== -->
+  <!-- 核心邏輯與五國語言字典腳本                  -->
+  <!-- ========================================== -->
+  <script>
+    /**
+     * 1. 五國語言界面與醫療專有名詞字典
+     */
+    const I18N = {
+      'zh-TW': {
+        headerTitle: '緊急醫療資訊卡',
+        btnView: '急救檢視',
+        btnEdit: '編輯建檔',
+        paramedicNotice: '致醫療救護人員：此頁面為旅客緊急醫療紀錄，點擊上方語言按鈕可即時切換為當地語言。',
+        secBasic: '個人基本資料',
+        lblName: '姓名 (護照拼音 / 本名)',
+        lblBlood: '血型',
+        lblGender: '性別',
+        lblAge: '年齡',
+        lblDob: '出生日期',
+        ageUnit: '歲',
+        secAllergy: '過敏史 (藥物 / 食物過敏)',
+        secMeds: '目前用藥紀錄',
+        secMedical: '內科病史 / 慢性病',
+        secSurgical: '外科病史 / 手術紀錄',
+        secIce: '緊急聯絡人 (ICE)',
+        lblIceName: '聯絡人姓名與關係',
+        lblIcePhone: '國際電話 & 備用聯絡方式',
+        btnShowQr: '顯示專屬網址與 QR Code',
+        btnPrint: '列印 / 存為 PDF',
+        btnEditBottom: '修改我的資料',
+        noneText: '無 / 無已知紀錄 (None)',
+        genderMap: { male: '男性 (Male)', female: '女性 (Female)', other: '其他 (Other)' },
+        relMap: { spouse: '配偶', parent: '父母', child: '子女', sibling: '兄弟姊妹', friend: '朋友/旅伴', other: '其他' }
+      },
+      'zh-CN': {
+        headerTitle: '紧急医疗信息卡',
+        btnView: '急救查看',
+        btnEdit: '编辑建档',
+        paramedicNotice: '致医疗救护人员：此页面为旅客紧急医疗记录，点击上方语言按钮可即时切换为当地语言。',
+        secBasic: '个人基本资料',
+        lblName: '姓名 (护照拼音 / 本名)',
+        lblBlood: '血型',
+        lblGender: '性别',
+        lblAge: '年龄',
+        lblDob: '出生日期',
+        ageUnit: '岁',
+        secAllergy: '过敏史 (药物 / 食物过敏)',
+        secMeds: '目前用药记录',
+        secMedical: '内科病史 / 慢性病',
+        secSurgical: '外科病史 / 手术记录',
+        secIce: '紧急联系人 (ICE)',
+        lblIceName: '联系人姓名与关系',
+        lblIcePhone: '国际电话 & 备用联系方式',
+        btnShowQr: '显示专属网址与 QR Code',
+        btnPrint: '打印 / 存为 PDF',
+        btnEditBottom: '修改我的资料',
+        noneText: '无 / 无已知记录 (None)',
+        genderMap: { male: '男性 (Male)', female: '女性 (Female)', other: '其他 (Other)' },
+        relMap: { spouse: '配偶', parent: '父母', child: '子女', sibling: '兄弟姐妹', friend: '朋友/旅伴', other: '其他' }
+      },
+      'en': {
+        headerTitle: 'Emergency Medical Card',
+        btnView: 'View Card',
+        btnEdit: 'Edit Record',
+        paramedicNotice: 'To Medical Personnel: This is an emergency travel medical record. Tap the language buttons above to translate immediately.',
+        secBasic: 'Patient Information',
+        lblName: 'Full Name (Passport / Native)',
+        lblBlood: 'Blood Type',
+        lblGender: 'Sex / Gender',
+        lblAge: 'Age',
+        lblDob: 'Date of Birth',
+        ageUnit: 'yrs',
+        secAllergy: 'Allergies (Drugs / Food)',
+        secMeds: 'Current Medications',
+        secMedical: 'Past Medical History',
+        secSurgical: 'Surgical History',
+        secIce: 'Emergency Contact (ICE)',
+        lblIceName: 'Contact Name & Relationship',
+        lblIcePhone: 'International Phone & Alt Contact',
+        btnShowQr: 'Show Share URL & QR Code',
+        btnPrint: 'Print / Save PDF',
+        btnEditBottom: 'Edit My Record',
+        noneText: 'None / No Known History',
+        genderMap: { male: 'Male', female: 'Female', other: 'Other' },
+        relMap: { spouse: 'Spouse', parent: 'Parent', child: 'Child', sibling: 'Sibling', friend: 'Friend', other: 'Other' }
+      },
+      'ja': {
+        headerTitle: '緊急医療情報カード',
+        btnView: '救急表示',
+        btnEdit: '情報編集',
+        paramedicNotice: '医療従事者の方へ：これは旅行者の緊急医療記録です。上部の言語ボタンで日本語に切り替わります。',
+        secBasic: '患者基本情報',
+        lblName: '氏名 (パスポート英語 / 母国語)',
+        lblBlood: '血液型',
+        lblGender: '性別',
+        lblAge: '年齢',
+        lblDob: '生年月日',
+        ageUnit: '歳',
+        secAllergy: 'アレルギー歴 (薬剤・食物)',
+        secMeds: '現在服用中の薬',
+        secMedical: '内科的既往歴・持病',
+        secSurgical: '外科的既往歴・手術歴',
+        secIce: '緊急連絡先 (ICE)',
+        lblIceName: '連絡先氏名・続柄',
+        lblIcePhone: '国際電話番号・その他連絡手段',
+        btnShowQr: '専用URL・QRコードを表示',
+        btnPrint: '印刷 / PDF保存',
+        btnEditBottom: '情報を編集する',
+        noneText: 'なし (None)',
+        genderMap: { male: '男性 (Male)', female: '女性 (Female)', other: 'その他 (Other)' },
+        relMap: { spouse: '配偶者', parent: '両親', child: '子供', sibling: '兄弟姉妹', friend: '友人・同行者', other: 'その他' }
+      },
+      'ko': {
+        headerTitle: '긴급 의료 정보 카드',
+        btnView: '응급 보기',
+        btnEdit: '정보 편집',
+        paramedicNotice: '의료진 귀하: 본 페이지는 여행자의 긴급 의료 기록입니다. 상단 언어 버튼을 누르면 즉시 번역됩니다.',
+        secBasic: '환자 기본 정보',
+        lblName: '성명 (여권 영문명 / 본명)',
+        lblBlood: '혈액형',
+        lblGender: '성별',
+        lblAge: '나이',
+        lblDob: '생년월일',
+        ageUnit: '세',
+        secAllergy: '알레르기 병력 (약물 / 음식)',
+        secMeds: '현재 복용 중인 약물',
+        secMedical: '내과적 병력 / 만성질환',
+        secSurgical: '외과적 병력 / 수술 이력',
+        secIce: '비상 연락처 (ICE)',
+        lblIceName: '연락처 이름 및 관계',
+        lblIcePhone: '국제 전화번호 및 기타 연락처',
+        btnShowQr: '전용 URL 및 QR 코드 보기',
+        btnPrint: '인쇄 / PDF 저장',
+        btnEditBottom: '내 정보 수정',
+        noneText: '없음 (None)',
+        genderMap: { male: '남성 (Male)', female: '여성 (Female)', other: '기타 (Other)' },
+        relMap: { spouse: '배우자', parent: '부모', child: '자녀', sibling: '형제자매', friend: '친구/동행인', other: '기타' }
+      }
+    };
+
+    /**
+     * 常見過敏原五國語言對照表
+     */
+    const ALLERGY_PRESETS = [
+      { id: 'nkda', 'zh-TW': '無已知過敏 (NKDA)', 'zh-CN': '无已知过敏 (NKDA)', 'en': 'No Known Drug Allergies (NKDA)', 'ja': '既知のアレルギーなし (NKDA)', 'ko': '알려진 알레르기 없음 (NKDA)' },
+      { id: 'penicillin', 'zh-TW': '盤尼西林 (Penicillin)', 'zh-CN': '青霉素 (Penicillin)', 'en': 'Penicillin', 'ja': 'ペニシリン (Penicillin)', 'ko': '페니실린 (Penicillin)' },
+      { id: 'nsaids', 'zh-TW': '非類固醇消炎藥 (NSAIDs)', 'zh-CN': '非甾体抗炎药 (NSAIDs)', 'en': 'NSAIDs (Painkillers)', 'ja': '非ステロイド性抗炎症薬 (NSAIDs)', 'ko': '비스테로이드성 소염진통제 (NSAIDs)' },
+      { id: 'aspirin', 'zh-TW': '阿斯匹靈 (Aspirin)', 'zh-CN': '阿司匹林 (Aspirin)', 'en': 'Aspirin', 'ja': 'アスピリン (Aspirin)', 'ko': '아스피린 (Aspirin)' },
+      { id: 'contrast', 'zh-TW': '顯影劑 (Contrast Media)', 'zh-CN': '造影剂 (Contrast Media)', 'en': 'Contrast Media (Iodine)', 'ja': '造影剤 (Contrast Media)', 'ko': '조영제 (Contrast Media)' },
+      { id: 'sulfa', 'zh-TW': '磺胺類藥物 (Sulfonamides)', 'zh-CN': '磺胺类药物 (Sulfonamides)', 'en': 'Sulfonamides (Sulfa drugs)', 'ja': 'サルファ剤 (Sulfonamides)', 'ko': '설파제 (Sulfonamides)' },
+      { id: 'seafood', 'zh-TW': '海鮮 / 甲殼類 (Seafood)', 'zh-CN': '海鲜 / 甲壳类 (Seafood)', 'en': 'Seafood / Shellfish', 'ja': '魚介類・甲殻類 (Seafood)', 'ko': '해산물 / 갑각류 (Seafood)' },
+      { id: 'peanuts', 'zh-TW': '花生 / 堅果 (Peanuts)', 'zh-CN': '花生 / 坚果 (Peanuts)', 'en': 'Peanuts / Tree Nuts', 'ja': 'ピーナッツ・ナッツ類 (Peanuts)', 'ko': '땅콩 / 견과류 (Peanuts)' }
+    ];
+
+    /**
+     * 常見慢性病五國語言對照表
+     */
+    const MEDICAL_PRESETS = [
+      { id: 'none', 'zh-TW': '無慢性病史 (None)', 'zh-CN': '无慢性病史 (None)', 'en': 'No Chronic Diseases (None)', 'ja': '持病なし (None)', 'ko': '만성질환 없음 (None)' },
+      { id: 'htn', 'zh-TW': '高血壓 (Hypertension)', 'zh-CN': '高血压 (Hypertension)', 'en': 'Hypertension (High BP)', 'ja': '高血圧 (Hypertension)', 'ko': '고혈압 (Hypertension)' },
+      { id: 'dm', 'zh-TW': '糖尿病 (Diabetes)', 'zh-CN': '糖尿病 (Diabetes)', 'en': 'Diabetes Mellitus', 'ja': '糖尿病 (Diabetes)', 'ko': '당뇨병 (Diabetes)' },
+      { id: 'asthma', 'zh-TW': '氣喘 (Asthma)', 'zh-CN': '哮喘 (Asthma)', 'en': 'Asthma', 'ja': '気管支喘息 (Asthma)', 'ko': '천식 (Asthma)' },
+      { id: 'heart', 'zh-TW': '心臟病 (Heart Disease)', 'zh-CN': '心脏病 (Heart Disease)', 'en': 'Heart Disease', 'ja': '心疾患 (Heart Disease)', 'ko': '심장병 (Heart Disease)' },
+      { id: 'epilepsy', 'zh-TW': '癲癇 (Epilepsy)', 'zh-CN': '癫痫 (Epilepsy)', 'en': 'Epilepsy', 'ja': 'てんかん (Epilepsy)', 'ko': '간질 (Epilepsy)' },
+      { id: 'stroke', 'zh-TW': '中風病史 (Stroke)', 'zh-CN': '脑卒中病史 (Stroke)', 'en': 'History of Stroke', 'ja': '脳卒中既往 (Stroke)', 'ko': '뇌졸중 병력 (Stroke)' }
+    ];
+
+    /**
+     * 應用程式全域狀態
+     */
+    let currentLang = 'zh-TW';
+    let currentMode = 'view'; // 'view' | 'edit'
+    
+    // 預設範例資料 (首次開啟無 Hash 時展示，讓使用者一眼看懂效果)
+    let medicalData = {
+      n: 'WANG, XIAO-MING (王小明)',
+      b: 'O+',
+      g: 'male',
+      d: '1992-05-15',
+      at: ['penicillin', 'seafood'], // 過敏標籤 ID 陣列
+      an: 'Penicillin causes severe skin rash and dyspnea.\n盤尼西林會引起嚴重皮膚紅疹與呼吸困難。',
+      m: '1. Cetirizine 10mg (PRN for allergy / 過敏時服用)\n2. Vitamin B Complex (Daily)',
+      mt: ['asthma'], // 內科標籤 ID 陣列
+      mn: 'Mild exercise-induced asthma; carries Salbutamol inhaler.\n輕微運動型氣喘，隨身攜帶支氣管擴張吸入劑。',
+      s: '2018 - Appendectomy (闌尾切除手術)',
+      in: 'LIN, MEI-LING (林美玲)',
+      ir: 'spouse',
+      ip: '+886-912-345-678',
+      ia: 'LINE / WhatsApp: +886912345678'
+    };
+
+    /**
+     * 2. 初始化應用程式
+     */
+    window.onload = function () {
+      renderPresetButtons();
+      
+      // 檢查 URL 是否帶有 #d= 病歷資料參數
+      const hasHashData = loadFromUrlHash();
+      
+      // 若 URL 有資料，預設直接進入「檢視/急救模式」；若無則載入範例並顯示檢視模式
+      fillFormFromData();
+      renderView();
+      setLanguage(detectBrowserLang());
+      switchMode('view');
+
+      // 監聽網址 Hash 變化 (例如使用者貼上新網址)
+      window.addEventListener('hashchange', () => {
+        if (loadFromUrlHash()) {
+          fillFormFromData();
+          renderView();
+          switchMode('view');
+        }
+      });
+    };
+
+    /**
+     * 自動偵測瀏覽器語言 (若為支援的五語之一則自動切換)
+     */
+    function detectBrowserLang() {
+      const navLang = (navigator.language || 'zh-TW').toLowerCase();
+      if (navLang.startsWith('zh-cn') || navLang.startsWith('zh-sg')) return 'zh-CN';
+      if (navLang.startsWith('zh')) return 'zh-TW';
+      if (navLang.startsWith('ja')) return 'ja';
+      if (navLang.startsWith('ko')) return 'ko';
+      if (navLang.startsWith('en')) return 'en';
+      return 'zh-TW';
+    }
+
+    /**
+     * 3. 語言切換邏輯
+     */
+    function setLanguage(lang) {
+      if (!I18N[lang]) return;
+      currentLang = lang;
+      const t = I18N[lang];
+
+      // 更新語言按鈕選中外觀
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        if (btn.dataset.lang === lang) {
+          btn.className = 'lang-btn flex-1 min-w-[68px] py-1.5 px-2 rounded-lg text-xs font-extrabold text-center transition cursor-pointer bg-white text-med-blue shadow-sm ring-2 ring-amber-400';
+        } else {
+          btn.className = 'lang-btn flex-1 min-w-[68px] py-1.5 px-2 rounded-lg text-xs font-semibold text-center transition cursor-pointer bg-blue-900/50 text-blue-100 hover:bg-blue-800';
+        }
+      });
+
+      // 更新 UI 靜態標籤文字
+      document.getElementById('ui-header-title').textContent = t.headerTitle;
+      document.getElementById('ui-btn-view').textContent = t.btnView;
+      document.getElementById('ui-btn-edit').textContent = t.btnEdit;
+      document.getElementById('ui-paramedic-notice').textContent = t.paramedicNotice;
+      
+      document.querySelector('#ui-sec-basic span:last-child').textContent = t.secBasic;
+      document.getElementById('ui-lbl-name').textContent = t.lblName;
+      document.getElementById('ui-lbl-blood').textContent = t.lblBlood;
+      document.getElementById('ui-lbl-gender').textContent = t.lblGender;
+      document.getElementById('ui-lbl-age').textContent = t.lblAge;
+      document.getElementById('ui-lbl-dob').textContent = t.lblDob;
+
+      document.querySelector('#ui-sec-allergy span:last-child').textContent = t.secAllergy;
+      document.querySelector('#ui-sec-meds span:last-child').textContent = t.secMeds;
+      document.querySelector('#ui-sec-medical span:last-child').textContent = t.secMedical;
+      document.querySelector('#ui-sec-surgical span:last-child').textContent = t.secSurgical;
+      document.querySelector('#ui-sec-ice span:last-child').textContent = t.secIce;
+
+      document.getElementById('ui-lbl-ice-name').textContent = t.lblIceName;
+      document.getElementById('ui-lbl-ice-phone').textContent = t.lblIcePhone;
+
+      document.getElementById('ui-btn-show-qr').textContent = t.btnShowQr;
+      document.getElementById('ui-btn-print').textContent = t.btnPrint;
+      document.getElementById('ui-btn-edit-bottom').textContent = t.btnEditBottom;
+
+      // 重新渲染動態病歷內容（自動翻譯性別、關係、預設過敏原與慢性病標籤）
+      renderView();
+    }
+
+    /**
+     * 4. 模式切換 ('view' | 'edit')
+     */
+    function switchMode(mode) {
+      currentMode = mode;
+      const viewSec = document.getElementById('view-section');
+      const editSec = document.getElementById('edit-section');
+      const btnView = document.getElementById('btn-mode-view');
+      const btnEdit = document.getElementById('btn-mode-edit');
+
+      if (mode === 'view') {
+        viewSec.classList.remove('hidden');
+        editSec.classList.add('hidden');
+        btnView.className = 'px-3 py-2 rounded-lg text-xs sm:text-sm font-bold transition cursor-pointer bg-white text-med-blue shadow';
+        btnEdit.className = 'px-3 py-2 rounded-lg text-xs sm:text-sm font-bold transition cursor-pointer bg-blue-900/60 text-blue-100 hover:bg-blue-800';
+      } else {
+        viewSec.classList.add('hidden');
+        editSec.classList.remove('hidden');
+        btnEdit.className = 'px-3 py-2 rounded-lg text-xs sm:text-sm font-bold transition cursor-pointer bg-white text-med-blue shadow';
+        btnView.className = 'px-3 py-2 rounded-lg text-xs sm:text-sm font-bold transition cursor-pointer bg-blue-900/60 text-blue-100 hover:bg-blue-800';
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /**
+     * 5. 渲染編輯表單的快選標籤按鈕
+     */
+    function renderPresetButtons() {
+      const allergyBox = document.getElementById('allergy-preset-container');
+      const medicalBox = document.getElementById('medical-preset-container');
+
+      allergyBox.innerHTML = ALLERGY_PRESETS.map(item => `
+        <button type="button" data-type="allergy" data-id="${item.id}" onclick="togglePresetTag('allergy', '${item.id}')"
+          class="preset-btn px-3 py-1.5 rounded-full text-xs font-bold border transition cursor-pointer">
+          ${item['zh-TW']}
+        </button>
+      `).join('');
+
+      medicalBox.innerHTML = MEDICAL_PRESETS.map(item => `
+        <button type="button" data-type="medical" data-id="${item.id}" onclick="togglePresetTag('medical', '${item.id}')"
+          class="preset-btn px-3 py-1.5 rounded-full text-xs font-bold border transition cursor-pointer">
+          ${item['zh-TW']}
+        </button>
+      `).join('');
+
+      updatePresetButtonStyles();
+    }
+
+    function togglePresetTag(type, id) {
+      const arrKey = type === 'allergy' ? 'at' : 'mt';
+      const noneId = type === 'allergy' ? 'nkda' : 'none';
+      let list = medicalData[arrKey] || [];
+
+      if (id === noneId) {
+        // 若點選「無過敏/無慢性病」，清除其他選項
+        list = list.includes(noneId) ? [] : [noneId];
+      } else {
+        // 移除 '無' 選項
+        list = list.filter(x => x !== noneId);
+        if (list.includes(id)) {
+          list = list.filter(x => x !== id);
+        } else {
+          list.push(id);
+        }
+      }
+
+      medicalData[arrKey] = list;
+      updatePresetButtonStyles();
+    }
+
+    function updatePresetButtonStyles() {
+      document.querySelectorAll('.preset-btn').forEach(btn => {
+        const type = btn.dataset.type;
+        const id = btn.dataset.id;
+        const isSelected = type === 'allergy'
+          ? (medicalData.at || []).includes(id)
+          : (medicalData.mt || []).includes(id);
+
+        if (isSelected) {
+          btn.className = type === 'allergy'
+            ? 'preset-btn px-3 py-1.5 rounded-full text-xs font-bold border border-alert-red bg-alert-red text-white shadow-xs transition cursor-pointer'
+            : 'preset-btn px-3 py-1.5 rounded-full text-xs font-bold border border-med-blue bg-med-blue text-white shadow-xs transition cursor-pointer';
+        } else {
+          btn.className = 'preset-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-300 bg-slate-50 text-slate-700 hover:bg-slate-100 transition cursor-pointer';
+        }
+      });
+    }
+
+    /**
+     * 6. 計算當前實歲年齡
+     */
+    function calculateAge(dobString) {
+      if (!dobString) return '-';
+      const dob = new Date(dobString);
+      if (isNaN(dob.getTime())) return '-';
+      const today = new Date();
+      let age = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+        age--;
+      }
+      return age >= 0 ? age : 0;
+    }
+
+    /**
+     * 7. 將資料渲染至「檢視/急救模式」畫面
+     */
+    function renderView() {
+      const t = I18N[currentLang];
+
+      // 基本資料
+      document.getElementById('view-name').textContent = medicalData.n || '-';
+      document.getElementById('view-blood').textContent = medicalData.b || 'Unknown';
+      document.getElementById('view-gender').textContent = t.genderMap[medicalData.g] || medicalData.g;
+      document.getElementById('view-dob').textContent = medicalData.d || '-';
+      const ageNum = calculateAge(medicalData.d);
+      document.getElementById('view-age').textContent = ageNum === '-' ? '-' : `${ageNum} ${t.ageUnit}`;
+
+      // 過敏史 (多國語言標籤 + 自由文字)
+      const allergyTagsEl = document.getElementById('view-allergy-tags');
+      const selectedAllergies = (medicalData.at || []).map(id => ALLERGY_PRESETS.find(p => p.id === id)).filter(Boolean);
+      
+      if (selectedAllergies.length > 0) {
+        allergyTagsEl.innerHTML = selectedAllergies.map(item => {
+          const isNkda = item.id === 'nkda';
+          const badgeClass = isNkda
+            ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
+            : 'bg-alert-red text-white border-red-700 shadow-xs';
+          return `<span class="px-3 py-1 rounded-lg text-sm font-extrabold border ${badgeClass}">${item[currentLang]}</span>`;
+        }).join('');
+      } else {
+        allergyTagsEl.innerHTML = '';
+      }
+
+      const allergyNoteEl = document.getElementById('view-allergy-note');
+      if (medicalData.an && medicalData.an.trim()) {
+        allergyNoteEl.textContent = medicalData.an.trim();
+        allergyNoteEl.classList.remove('hidden');
+      } else if (selectedAllergies.length === 0) {
+        allergyNoteEl.textContent = t.noneText;
+        allergyNoteEl.classList.remove('hidden');
+      } else {
+        allergyNoteEl.classList.add('hidden');
+      }
+
+      // 目前用藥
+      document.getElementById('view-meds').textContent = (medicalData.m && medicalData.m.trim()) ? medicalData.m.trim() : t.noneText;
+
+      // 內科病史 (多國語言標籤 + 自由文字)
+      const medTagsEl = document.getElementById('view-medical-tags');
+      const selectedMedical = (medicalData.mt || []).map(id => MEDICAL_PRESETS.find(p => p.id === id)).filter(Boolean);
+      
+      if (selectedMedical.length > 0) {
+        medTagsEl.innerHTML = selectedMedical.map(item => `
+          <span class="px-2.5 py-1 rounded-lg text-xs sm:text-sm font-bold bg-blue-100 text-med-blue border border-blue-200">
+            ${item[currentLang]}
+          </span>
+        `).join('');
+      } else {
+        medTagsEl.innerHTML = '';
+      }
+
+      const medNoteEl = document.getElementById('view-medical-note');
+      if (medicalData.mn && medicalData.mn.trim()) {
+        medNoteEl.textContent = medicalData.mn.trim();
+        medNoteEl.classList.remove('hidden');
+      } else if (selectedMedical.length === 0) {
+        medNoteEl.textContent = t.noneText;
+        medNoteEl.classList.remove('hidden');
+      } else {
+        medNoteEl.classList.add('hidden');
+      }
+
+      // 外科病史
+      document.getElementById('view-surgical').textContent = (medicalData.s && medicalData.s.trim()) ? medicalData.s.trim() : t.noneText;
+
+      // 緊急聯絡人
+      document.getElementById('view-ice-name').textContent = medicalData.in || '-';
+      document.getElementById('view-ice-rel').textContent = t.relMap[medicalData.ir] || medicalData.ir;
+      
+      const phoneStr = medicalData.ip || '-';
+      document.getElementById('view-ice-phone').textContent = phoneStr;
+      document.getElementById('view-ice-phone-link').href = phoneStr !== '-' ? `tel:${phoneStr.replace(/[^+\d]/g, '')}` : '#';
+      document.getElementById('view-ice-alt').textContent = medicalData.ia || '';
+    }
+
+    /**
+     * 8. 表單資料與狀態同步
+     */
+    function fillFormFromData() {
+      document.getElementById('input-name').value = medicalData.n || '';
+      document.getElementById('input-blood').value = medicalData.b || 'O+';
+      document.getElementById('input-gender').value = medicalData.g || 'male';
+      document.getElementById('input-dob').value = medicalData.d || '';
+      document.getElementById('input-allergy-note').value = medicalData.an || '';
+      document.getElementById('input-meds').value = medicalData.m || '';
+      document.getElementById('input-medical-note').value = medicalData.mn || '';
+      document.getElementById('input-surgical').value = medicalData.s || '';
+      document.getElementById('input-ice-name').value = medicalData.in || '';
+      document.getElementById('input-ice-rel').value = medicalData.ir || 'spouse';
+      document.getElementById('input-ice-phone').value = medicalData.ip || '';
+      document.getElementById('input-ice-alt').value = medicalData.ia || '';
+      updatePresetButtonStyles();
+    }
+
+    function readDataFromForm() {
+      medicalData.n = document.getElementById('input-name').value.trim();
+      medicalData.b = document.getElementById('input-blood').value;
+      medicalData.g = document.getElementById('input-gender').value;
+      medicalData.d = document.getElementById('input-dob').value;
+      medicalData.an = document.getElementById('input-allergy-note').value.trim();
+      medicalData.m = document.getElementById('input-meds').value.trim();
+      medicalData.mn = document.getElementById('input-medical-note').value.trim();
+      medicalData.s = document.getElementById('input-surgical').value.trim();
+      medicalData.in = document.getElementById('input-ice-name').value.trim();
+      medicalData.ir = document.getElementById('input-ice-rel').value;
+      medicalData.ip = document.getElementById('input-ice-phone').value.trim();
+      medicalData.ia = document.getElementById('input-ice-alt').value.trim();
+    }
+
+    function clearForm() {
+      medicalData = {
+        n: '', b: 'O+', g: 'male', d: '',
+        at: [], an: '', m: '', mt: [], mn: '', s: '',
+        in: '', ir: 'spouse', ip: '', ia: ''
+      };
+      fillFormFromData();
+      showToast('已清空所有欄位，請輸入您的資料', '🧹');
+    }
+
+    /**
+     * 9. URL Hash 序列化壓縮與解碼 (UTF-8 安全 + LZString)
+     */
+    function encodeDataToHash() {
+      try {
+        const jsonStr = JSON.stringify(medicalData);
+        // 使用 LZString.compressToEncodedURIComponent 產生極短且網址安全的字串
+        const compressed = LZString.compressToEncodedURIComponent(jsonStr);
+        window.history.replaceState(null, '', '#d=' + compressed);
+        return window.location.href;
+      } catch (e) {
+        console.error('Encoding error:', e);
+        return window.location.href;
+      }
+    }
+
+    function loadFromUrlHash() {
+      try {
+        const hash = window.location.hash;
+        if (!hash || !hash.startsWith('#d=')) return false;
+        const encoded = hash.slice(3);
+        if (!encoded) return false;
+
+        const decompressed = LZString.decompressFromEncodedURIComponent(encoded);
+        if (!decompressed) return false;
+
+        const parsed = JSON.parse(decompressed);
+        if (parsed && typeof parsed === 'object') {
+          medicalData = { ...medicalData, ...parsed };
+          return true;
+        }
+      } catch (e) {
+        console.error('Decoding error:', e);
+      }
+      return false;
+    }
+
+    /**
+     * 10. 產生專屬 URL 與 QR Code 彈窗邏輯
+     */
+    function generateAndShowShare() {
+      readDataFromForm();
+      const shareUrl = encodeDataToHash();
+      renderView();
+      switchMode('view');
+      openShareModal(shareUrl);
+    }
+
+    function openShareModal(customUrl) {
+      const url = customUrl || encodeDataToHash();
+      const modal = document.getElementById('share-modal');
+      const urlInput = document.getElementById('share-url-input');
+      const qrContainer = document.getElementById('qrcode');
+
+      urlInput.value = url;
+      qrContainer.innerHTML = '';
+
+      // 繪製高容錯率 QR Code
+      try {
+        new QRCode(qrContainer, {
+          text: url,
+          width: 210,
+          height: 210,
+          colorDark: '#0F4C81',
+          colorLight: '#FFFFFF',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      } catch (err) {
+        qrContainer.innerHTML = '<p class="text-xs text-red-600 font-bold">資料過長無法產生 QR Code，請精簡部分文字說明。</p>';
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeShareModal() {
+      document.getElementById('share-modal').classList.add('hidden');
+    }
+
+    function copyShareUrl() {
+      const urlInput = document.getElementById('share-url-input');
+      urlInput.select();
+      urlInput.setSelectionRange(0, 99999);
+      try {
+        document.execCommand('copy');
+        showToast('專屬病歷網址已複製到剪貼簿！', '📋');
+      } catch (err) {
+        showToast('請手動全選並複製網址', '⚠️');
+      }
+    }
+
+    function downloadQRImage() {
+      const qrCanvas = document.querySelector('#qrcode canvas');
+      const qrImg = document.querySelector('#qrcode img');
+      let dataUrl = '';
+
+      if (qrCanvas) {
+        dataUrl = qrCanvas.toDataURL('image/png');
+      } else if (qrImg && qrImg.src) {
+        dataUrl = qrImg.src;
+      }
+
+      if (!dataUrl) {
+        showToast('無法匯出圖片，請直接螢幕截圖', '⚠️');
+        return;
+      }
+
+      const link = document.createElement('a');
+      link.download = `Emergency-Medical-QR-${(medicalData.n || 'Traveler').replace(/\s+/g, '_')}.png`;
+      link.href = dataUrl;
+      link.click();
+      showToast('QR Code 圖片已開始下載', '🖼️');
+    }
+
+    /**
+     * 11. 下載完整單一 HTML 檔案 (方便使用者自行託管至 GitHub Pages 或離線保存)
+     */
+    function downloadStandaloneHTML() {
+      readDataFromForm();
+      encodeDataToHash();
+      const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'travel-emergency-medical-record.html';
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('單一完整 HTML 檔案已下載！', '💾');
+    }
+
+    /**
+     * 12. 提示訊息工具 (取代 alert)
+     */
+    let toastTimer = null;
+    function showToast(msg, icon = '✅') {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-msg').textContent = msg;
+      document.getElementById('toast-icon').textContent = icon;
+      toast.classList.remove('hidden');
+
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3000);
+    }
+  </script>
+
+</body></html>
